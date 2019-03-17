@@ -1,4 +1,12 @@
 require_relative './event_store.rb'
+require_relative './events.rb'
+
+
+module Domain
+
+end
+
+
 
 event_store = EventStore.new
 
