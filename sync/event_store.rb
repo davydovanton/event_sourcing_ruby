@@ -4,8 +4,7 @@
 #   Get : unit -> event list
 #   Append : event list -> unit
 #
-# Based on Concurrent/Channel
-# https://www.rubydoc.info/gems/concurrent-ruby/0.5.0/Concurrent/Channel
+# Based on Concurrent/Actor
 
 require 'concurrent'
 require 'concurrent/actor'
