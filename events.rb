@@ -7,7 +7,7 @@ module Events
     end
 
     def inspect
-      "Events::#{self.class.name} payload: #{payload.inspect}"
+      "#{self.class.name} payload: #{payload.inspect}"
     end
   end
 
