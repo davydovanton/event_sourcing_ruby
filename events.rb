@@ -5,6 +5,10 @@ module Events
     def initialize(payload)
       @payload = payload
     end
+
+    def inspect
+      "Events::#{self.class.name} payload: #{payload.inspect}"
+    end
   end
 
   class FlavourSold < Base
