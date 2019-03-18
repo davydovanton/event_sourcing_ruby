@@ -26,3 +26,28 @@ Event Store --(get)--> list of events
 $ bundle exec ruby sync/base.rb
 ```
 
+## Async version
+
+
+Including:
+* Events
+* Event Store
+* Projections for calculating state for list of events
+* Producers for call bussines logic
+
+### How it works
+
+```
+Producers(current events, payload) ----> New Events --(append)--> Event store
+Event --(append)--> Event store
+Event Store --(get)--> list of events
+
+(Projection function (object), base state, list of events) ----> new state
+```
+
+### How to run
+
+```
+$ bundle exec ruby async/base.rb
+```
+
