@@ -42,23 +42,48 @@ private
 
   class MessageBox < Concurrent::Actor::Context
     def initialize
-      @history = Hash.new { [] }
+      @adapter = Adapters::InMemory.new
     end
 
     def on_message(message)
       case message[:type]
       when :get
-        @history
+        @adapter.get
       when :get_stream
-        @history[message[:event_source]]
+        @adapter.get_stream(message[:event_source])
       when :append
-        @history[message[:event_source]] << message[:event]
+        @adapter.append(message[:event_source], message[:event])
       when :evolve
-        new_events = message[:producer].call(@history[message[:event_source]], message[:payload])
-        @history[message[:event_source]] = @history[message[:event_source]] + new_events
+        current_events = @adapter.get_stream(message[:event_source])
+        new_events = message[:producer].call(current_events, message[:payload])
+        @adapter.append_events(message[:event_source], new_events)
       else
         # pass to ErrorsOnUnknownMessage behaviour, which will just fail
         pass
+      end
+    end
+  end
+
+  module Adapters
+    class InMemory
+      def initialize
+        @store = Hash.new { [] }
+      end
+
+      def get
+        @store
+      end
+
+      def get_stream(source)
+        @store[source]
+      end
+
+      def append(source, event)
+        @store[source] << event
+      end
+
+      def append_events(source, events)
+        @store[source] = @store[source] + events
       end
     end
   end
