@@ -12,12 +12,6 @@ require 'concurrent/actor'
 require 'securerandom'
 
 class EventStore
-  class EventSource
-    def call
-      SecureRandom.uuid
-    end
-  end
-
   def initialize
     @message_box = MessageBox.spawn(name: :message_box)
   end
@@ -26,23 +20,39 @@ class EventStore
     @message_box.ask(type: :get).value
   end
 
-  def get_stream(event_source)
-    @message_box.ask(type: :get_stream, event_source: event_source).value
+  def get_stream(stream)
+    @message_box.ask(type: :get_stream, stream: stream).value
   end
 
-  def append(event_source, *events)
-    events.each { |event| @message_box.tell(type: :append, event_source: event_source, event: event) }
+  def append(stream, *events)
+    events.each { |event| @message_box.tell(type: :append, stream: stream, event: event) }
   end
 
-  def evolve(event_source, producer, payload)
-    @message_box.ask(type: :evolve, event_source: event_source, producer: producer, payload: payload)
+  def evolve(stream, producer, payload)
+    @message_box.ask(type: :evolve, stream: stream, producer: producer, payload: payload)
+  end
+
+  def subscribe(event_class, &block)
+    @message_box.ask(type: :subscribe, event_class: event_class, subscriber_block: block)
   end
 
 private
 
+  class Subscriber
+    def initialize(event_class, block)
+      @event_class = event_class
+      @block = block
+    end
+
+    def call(event)
+      @block.call(event) if @event_class.name == event.class.name
+    end
+  end
+
   class MessageBox < Concurrent::Actor::Context
     def initialize
       @adapter = Adapters::InMemory.new
+      @subscribers = []
     end
 
     def on_message(message)
@@ -50,13 +60,19 @@ private
       when :get
         @adapter.get
       when :get_stream
-        @adapter.get_stream(message[:event_source])
+        @adapter.get_stream(message[:stream])
       when :append
-        @adapter.append(message[:event_source], message[:event])
+        @adapter.append(message[:stream], message[:event])
+
+        @subscribers.each { |s| s.call(message[:event]) }
       when :evolve
-        current_events = @adapter.get_stream(message[:event_source])
+        current_events = @adapter.get_stream(message[:stream])
         new_events = message[:producer].call(current_events, message[:payload])
-        @adapter.append_events(message[:event_source], new_events)
+        @adapter.append_events(message[:stream], new_events)
+
+        new_events.each { |event| @subscribers.each { |s| s.call(event) } }
+      when :subscribe
+        @subscribers << Subscriber.new(message[:event_class], message[:subscriber_block])
       else
         # pass to ErrorsOnUnknownMessage behaviour, which will just fail
         pass
@@ -67,23 +83,23 @@ private
   module Adapters
     class InMemory
       def initialize
-        @store = Hash.new { [] }
+        @store = Concurrent::Hash.new { [] }
       end
 
       def get
         @store
       end
 
-      def get_stream(source)
-        @store[source]
+      def get_stream(stream)
+        @store[stream]
       end
 
-      def append(source, event)
-        @store[source] << event
+      def append(stream, event)
+        @store[stream] << event
       end
 
-      def append_events(source, events)
-        @store[source] = @store[source] + events
+      def append_events(stream, events)
+        @store[stream] = @store[stream] + events
       end
     end
   end

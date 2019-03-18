@@ -6,8 +6,16 @@ require_relative './projections.rb'
 
 event_store = EventStore.new
 
-first_shop = EventStore::EventSource.new.call
-second_shop = EventStore::EventSource.new.call
+event_store.subscribe(Events::FlavourRestocked) do |event|
+  Logger.new(STDOUT).warn "Restock #{event.payload.last} of #{event.payload.first} flavour"
+end
+
+event_store.subscribe(Events::FlavourSold) do |event|
+  Logger.new(STDOUT).info event.inspect
+end
+
+first_shop = 'first_shop_stream'
+second_shop = 'second_shop_stream'
 
 event_store.evolve(first_shop, Producers::RestockFlavour.new, flavour: :vanilla, count: 2)
 event_store.evolve(second_shop, Producers::RestockFlavour.new, flavour: :vanilla, count: 3)
@@ -31,6 +39,7 @@ event_store.evolve(second_shop, Producers::SellFlavour.new, flavour: :strawberry
 first_shop_events = event_store.get_stream(first_shop) # => [...]
 
 # #print_events from helpers 
+puts "\n"
 puts "Events for shop #{first_shop}:"
 print_events first_shop_events
 
