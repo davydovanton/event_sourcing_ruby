@@ -11,9 +11,17 @@ Including:
 * Event Store
 * Projections for calculating state for list of events
 
-Entry point: `base.rb` file.
+### How it works
+
+```
+Event --(append)--> Event store
+Event Store --(get)--> list of events
+
+(Projection function (object), base state, list of events) ----> new state
+```
 
 ### How to run
+
 ```
 $ bundle exec ruby sync/base.rb
 ```
