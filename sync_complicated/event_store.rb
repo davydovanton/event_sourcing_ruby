@@ -11,12 +11,21 @@ require 'concurrent'
 require 'concurrent/actor'
 
 class EventStore
+  class EventSource
+    def call
+      SecureRandom.uuid
+    end
+  end
+
   def initialize
     @message_box = MessageBox.spawn(name: :message_box)
   end
 
   def get
     @message_box.ask(type: :get).value
+  end
+
+  def get_streem
   end
 
   def append(*events)

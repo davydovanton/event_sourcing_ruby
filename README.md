@@ -26,14 +26,24 @@ Event Store --(get)--> list of events
 $ bundle exec ruby sync/base.rb
 ```
 
-## Async version
-
+## Sync complicated version
 
 Including:
 * Events
 * Event Store
 * Projections for calculating state for list of events
 * Producers for call bussines logic
+* Aggregators for streams (based on uuid)
+
+## Async version
+
+Including:
+* Events
+* Event Store
+* Projections for calculating state for list of events
+* Producers for call bussines logic
+* Aggregators for streams (based on uuid)
+* Subscribers
 
 ### How it works
 
