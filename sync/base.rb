@@ -5,10 +5,11 @@ require_relative './projections.rb'
 
 event_store = EventStore.new
 
+event_store.append(Events::FlavourRestocked.new([:vanilla, 3]))
 event_store.append(Events::FlavourSold.new(:vanilla))
 event_store.append(Events::FlavourSold.new(:vanilla))
 event_store.append(Events::FlavourSold.new(:strawberry))
-event_store.append(Events::FlavourSold.new(:vanilla), Events::FlavourRestocked.new([:vanilla, 3]))
+event_store.append(Events::FlavourSold.new(:vanilla))
 
 events = event_store.get # => [...]
 
