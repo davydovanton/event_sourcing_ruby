@@ -41,10 +41,18 @@ EVENT_STORE.evolve(TASK_STREAM, Producers::CreateTask.new, id: 2, title: 'Create
 display_state
 sleep(3)
 
+EVENT_STORE.evolve(TASK_STREAM, Producers::CreateTask.new, id: 3, title: 'Allow to work with different tasks in same time')
+display_state
+sleep(3)
+
 EVENT_STORE.evolve(TASK_STREAM, Producers::UpdateTaskTitle.new, id: 2, title: 'Update "Create producer for updating task title"')
 display_state
 sleep(3)
 
 EVENT_STORE.evolve(TASK_STREAM, Producers::CompleteTask.new, id: 2)
+display_state
+sleep(3)
+
+EVENT_STORE.evolve(TASK_STREAM, Producers::CompleteTask.new, id: 3)
 display_state
 sleep(3)
