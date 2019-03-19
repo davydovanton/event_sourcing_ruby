@@ -1,6 +1,5 @@
 require 'securerandom'
 
-
 module Events
   class Base
     attr_reader :payload, :eid, :created_at

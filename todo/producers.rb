@@ -6,7 +6,7 @@
 module Producers
   class CreateTask
     def call(events, payload)
-      [Events::TaskCreated.new(id: payload[:id], title: payload[:title], status: 'open')]
+      [Events::TaskCreated.new(payload: { id: payload[:id], title: payload[:title], status: 'open' })]
     end
   end
 
@@ -19,9 +19,9 @@ module Producers
       existed_ids = @project.call(Projections::TaskIds.new, {}, events)[:ids]
 
       if existed_ids.include?(payload[:id])
-        [Events::TaskUpdated.new(id: payload[:id], status: 'completed')]
+        [Events::TaskUpdated.new(payload: { id: payload[:id], status: 'completed' })]
       else
-        [Events::NotExistedTaskCompleted.new(id: payload[:id])]
+        [Events::NotExistedTaskCompleted.new(payload: { id: payload[:id] })]
       end
     end
   end
@@ -35,9 +35,9 @@ module Producers
       existed_ids = @project.call(Projections::TaskIds.new, {}, events)[:ids]
 
       if existed_ids.include?(payload[:id])
-        [Events::TaskUpdated.new(id: payload[:id], title: payload[:title])]
+        [Events::TaskUpdated.new(payload: { id: payload[:id], title: payload[:title] })]
       else
-        [Events::NotExistedTaskCompleted.new(id: payload[:id])]
+        [Events::NotExistedTaskCompleted.new(payload: { id: payload[:id] })]
       end
     end
   end
