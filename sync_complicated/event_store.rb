@@ -10,6 +10,7 @@
 require 'concurrent'
 require 'concurrent/actor'
 require 'securerandom'
+require 'sequel'
 
 class EventStore
   def initialize
@@ -51,7 +52,7 @@ private
 
   class MessageBox < Concurrent::Actor::Context
     def initialize
-      @adapter = Adapters::InMemory.new
+      @adapter = Adapters::Psql.new
       @subscribers = []
     end
 
@@ -100,6 +101,53 @@ private
 
       def append_events(stream, events)
         @store[stream] = @store[stream] + events
+      end
+    end
+
+    class Psql
+      def initialize
+        @db = Sequel.connect('postgres://localhost/todo_app_event_sourcing')
+      end
+
+      def get
+        groupped_events
+      end
+
+      def get_stream(stream)
+        groupped_events[stream]
+      end
+
+      def append(stream, event)
+        @db[:events].insert(event_to_hash(event, stream))
+      end
+
+      def append_events(stream, events)
+        @db[:events].multi_insert(events.map { |event| event_to_hash(event, stream) })
+      end
+
+    private
+
+      def groupped_events
+        @db[:events].all.map do |event|
+          Object.const_get(event[:event_name]).new(
+            eid: event[:eid],
+            stream: event[:stream],
+            version: event[:version],
+            created_at: event[:created_at],
+            payload: JSON.parse(event[:payload], symbolize_names: true)
+          )
+        end.group_by(&:stream)
+      end
+
+      def event_to_hash(event, stream)
+        {
+          eid: event.eid,
+          event_name: event.class.name,
+          stream: stream,
+          version: event.version,
+          created_at: event.created_at,
+          payload: event.payload.to_json
+        }
       end
     end
   end

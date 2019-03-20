@@ -9,6 +9,7 @@ module Events
     attribute :eid, Types::String.default { SecureRandom.uuid }
     attribute :created_at, Types::Time.default { Time.now }
     attribute :version, Types::String.default('v1')
+    attribute :stream, Types::String.default('')
 
     def self.payload_attributes(value = nil)
       if value

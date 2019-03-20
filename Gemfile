@@ -7,4 +7,8 @@ gem 'concurrent-ruby'
 gem 'concurrent-ruby-edge'
 gem 'pry'
 gem 'rb-readline'
+
 gem 'dry-struct'
+
+gem 'sequel'
+gem 'pg'
