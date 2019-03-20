@@ -128,7 +128,7 @@ private
     private
 
       def groupped_events
-        @db[:events].all.map do |event|
+        @db[:events].order(:created_at).all.map do |event|
           Object.const_get(event[:event_name]).new(
             eid: event[:eid],
             stream: event[:stream],
