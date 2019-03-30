@@ -35,9 +35,6 @@ event_store.evolve(task_stream, Producers::CompleteTask.new, id: 3)
 
 events = event_store.get_stream(task_stream)
 
-puts '*' * 80
-puts events
-
 project = Projections::Project.new
 
 tasks_status = project.call(Projections::TotalAndCompletedTasks.new, {}, events)

@@ -44,3 +44,13 @@ $ bundle exec ruby sync_complicated/base.rb
 ```
 
 ## TODO app
+
+Including:
+* Events
+* Event Store
+* Projections for calculating state for list of events
+* Producers for call bussines logic
+* Aggregators for streams (based on uuid)
+* Subscribers
+
+Simple flow for add todo to list and remove or rename it
