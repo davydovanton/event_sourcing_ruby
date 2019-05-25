@@ -2,6 +2,9 @@
 
 Simple repository for playing with event sourcing conceptions from f#
 
+## Notes
+All "lib" code from this repository was moved to http://github.com/davydovanton/ivento. You can use this PoC gem istead implementing this code by hands.
+
 ## Sync version
 
 Simple event sourcing system with getting event by hands. It's mean that you need to call event store `get` method every time for getting list of all events. After that you can use projections for calculate state of the system based on events which you get from event store.
